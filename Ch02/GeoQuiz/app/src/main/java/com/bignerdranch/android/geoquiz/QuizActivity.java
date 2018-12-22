@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,8 +12,8 @@ public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
     private Button mFalseButton;
-    private Button mNextButton;
-    private Button mPrevButton;
+    private ImageButton mNextImgButton;
+    private ImageButton mPrevImgButton;
 
     private TextView mQuestionTextView;
 
@@ -73,16 +74,16 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-        mNextButton = (Button) findViewById(R.id.next_button);
-        mNextButton.setOnClickListener(new View.OnClickListener() {
+        mNextImgButton = (ImageButton) findViewById(R.id.next_img_button);
+        mNextImgButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showNextQuestion();
             }
         });
 
-        mPrevButton = (Button) findViewById(R.id.prev_button);
-        mPrevButton.setOnClickListener(new View.OnClickListener() {
+        mPrevImgButton = (ImageButton) findViewById(R.id.prev_img_button);
+        mPrevImgButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showPrevQuestion();
