@@ -12,5 +12,6 @@
     <string name="question_americas">아마존강은 아메리카 대륙에서 가장 긴 강이다.</string>
     <string name="question_asia">바이칼 호수는 세계에서 가장 오래되고
         가장 깊은 담수호이다.</string>
+    <string name="prev_button">이전</string>
 
 </resources>
