@@ -2,6 +2,7 @@ package com.bignerdranch.android.geoquiz;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,8 +13,9 @@ import android.widget.Toast;
 
 public class QuizActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
-    private static final String KEY_INDEX = "index";
     private static final int REQUEST_CODE_CHEAT = 0;
+    private static final String KEY_CURRENT_INDEX = "key_current_index";
+    private static final String KEY_QUESTIONS = "key_questions";
 
     private Button mTrueButton;
     private Button mFalseButton;
@@ -28,8 +30,8 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_americas, true),
             new Question(R.string.question_asia, true)
     };
+
     private int mCurrentIndex = 0;
-    private boolean mIsCheater;
 
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
@@ -40,7 +42,7 @@ public class QuizActivity extends AppCompatActivity {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
 
         int messageResId = 0;
-        if (mIsCheater) {
+        if (mQuestionBank[mCurrentIndex].isCheater()) {
             messageResId = R.string.judgment_toast;
         } else {
             if (userPressedTrue == answerIsTrue) {
@@ -59,6 +61,17 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_quiz);
 
+        if (savedInstanceState != null) {
+            mCurrentIndex = savedInstanceState.getInt(KEY_CURRENT_INDEX);
+            mQuestionBank = getParcelabeArray(savedInstanceState);
+        }
+
+        initUI();
+
+        updateQuestion();
+    }
+
+    private void initUI() {
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
 
         mTrueButton = (Button) findViewById(R.id.true_button);
@@ -82,7 +95,6 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-                mIsCheater = false;
                 updateQuestion();
             }
         });
@@ -96,12 +108,16 @@ public class QuizActivity extends AppCompatActivity {
                 startActivityForResult(i, REQUEST_CODE_CHEAT);
             }
         });
+    }
 
-        if (savedInstanceState != null) {
-            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+    private Question[] getParcelabeArray(Bundle savedInstanceState) {
+        Parcelable[] questions = savedInstanceState.getParcelableArray(KEY_QUESTIONS);
+        Question[] questionsTemp = Question.CREATOR.newArray(questions.length);
+        for (int i = 0; i < questions.length; i++) {
+            questionsTemp[i] = (Question) questions[i];
         }
 
-        updateQuestion();
+        return questionsTemp;
     }
 
     @Override
@@ -113,7 +129,10 @@ public class QuizActivity extends AppCompatActivity {
             if (data == null) {
                 return;
             }
-            mIsCheater = CheatActivity.wasAnswerShown(data);
+            boolean isCheated = CheatActivity.wasAnswerShown(data);
+            Log.i(TAG, "onActivityResult, mCurrentIndex = " + mCurrentIndex +
+                    ", isCheated = " + isCheated);
+            mQuestionBank[mCurrentIndex].setCheater(isCheated);
         }
     }
 
@@ -121,7 +140,8 @@ public class QuizActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG, "onSaveInstanceState");
-        savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putInt(KEY_CURRENT_INDEX, mCurrentIndex);
+        savedInstanceState.putParcelableArray(KEY_QUESTIONS, mQuestionBank);
     }
 
     @Override
